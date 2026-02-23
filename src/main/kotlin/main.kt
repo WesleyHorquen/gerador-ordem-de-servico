@@ -1,3 +1,5 @@
+package src.main.kotlin
+
 fun validaNome(mensagem: String): String {
     while (true) {
         println(mensagem)
@@ -56,6 +58,25 @@ fun menuDeOS() {
     }
 }
 
+// Classe para armazenar os dados iniciais
+data class DadosIniciais(
+    val dataAtendimento: String,
+    val chegada: String,
+    val saida: String,
+    val clientePresente: String
+)
+
+// Modifique a função dadosIniciais para RETORNAR os dados
+fun dadosIniciais(): DadosIniciais {
+    val dataAtendimento = lerEntrada("\nData do Atendimento (DD/MM/AA): ")
+    val chegada = lerEntrada("Chegada (HH:MM): ")
+    val saida = lerEntrada("Saída (HH:MM): ")
+    val clientePresente = lerSimNao("Cliente estava no local")
+
+    return DadosIniciais(dataAtendimento, chegada, saida, clientePresente)
+}
+
+
 fun visitaTecnica() {
     println("\n" + "=".repeat(50))
     println("\t>>> Visita Tecnica <<<")
@@ -85,11 +106,7 @@ fun reativacao() {
     println("\t>>> REATIVAÇÃO <<<")
     println("=".repeat(50))
 
-    // Dados básicos (sempre preenchidos)
-    val dataAtendimento = lerEntrada("\nData do Atendimento (DD/MM/AA): ")
-    val chegada = lerEntrada("Chegada (HH:MM): ")
-    val saida = lerEntrada("Saída (HH:MM): ")
-    val clientePresente = lerSimNao("Cliente estava no local")
+    val dados = dadosIniciais()
 
     // Variáveis que podem ser vazias se cliente não estava presente
     var instaladoEm = ""
@@ -100,7 +117,7 @@ fun reativacao() {
     var temEquipamentosTV = ""
 
     // Só pergunta sobre equipamento se cliente estava presente
-    if (clientePresente == "SIM") {
+    if (dados.clientePresente == "SIM") {
         println("\n📍 DADOS DO EQUIPAMENTO (cliente presente):")
         instaladoEm = lerEntrada("Equipamento instalado no(a): ")
         modelo = lerEntrada("Modelo do Equipamento: ")
@@ -121,16 +138,16 @@ fun reativacao() {
     println("\n✍️ ASSINATURAS:")
     val assinaturaTecnico = lerEntrada("Assinatura do Técnico: ")
     val assinaturaCliente = lerEntrada("Assinatura do Cliente/Responsável: ",
-        permitirVazio = clientePresente != "SIM") // Opcional se cliente não estava presente
+        permitirVazio = dados.clientePresente != "SIM") // Opcional se cliente não estava presente
     val cpfCliente = lerEntrada("CPF do Cliente/Responsável (opcional): ", permitirVazio = true)
 
     // Criar objeto OS com os dados coletados
     val os = OrdemServico(
         tipo = "Reativação",
-        dataAtendimento = dataAtendimento,
-        chegada = chegada,
-        saida = saida,
-        clientePresente = clientePresente,
+        dataAtendimento = dados.dataAtendimento,
+        chegada = dados.chegada,
+        saida = dados.saida,
+        clientePresente = dados.clientePresente,
         instaladoEm = instaladoEm,
         modelo = modelo,
         sinal = sinal,
