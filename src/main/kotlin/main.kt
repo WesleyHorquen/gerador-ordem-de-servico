@@ -76,6 +76,26 @@ fun dadosIniciais(): DadosIniciais {
     return DadosIniciais(dataAtendimento, chegada, saida, clientePresente)
 }
 
+data class ObsAssinaturas(
+    val observacoes: String,
+    val assinaturaTecnico: String,
+    val assinaturaCliente: String,
+    val cpfCliente: String
+)
+
+fun obsAssinaturas(clientePresente: String): ObsAssinaturas {
+    // Observações e assinaturas (sempre preenchidos)
+    println("\n📋 OBSERVAÇÕES:")
+    val observacoes = lerEntrada("OBS: ", permitirVazio = true)
+
+    println("\n✍️ ASSINATURAS:")
+    val assinaturaTecnico = lerEntrada("Assinatura do Técnico: ")
+    val assinaturaCliente = lerEntrada("Assinatura do Cliente/Responsável: ",
+        permitirVazio = clientePresente != "SIM") // Opcional se cliente não estava presente
+    val cpfCliente = lerEntrada("CPF do Cliente/Responsável (opcional): ", permitirVazio = true)
+
+    return ObsAssinaturas(observacoes, assinaturaTecnico, assinaturaCliente, cpfCliente)
+}
 
 fun visitaTecnica() {
     println("\n" + "=".repeat(50))
@@ -99,6 +119,51 @@ fun instalacaoDeRepetidores() {
     println("\n" + "=".repeat(50))
     println("\t>>> Instalacao de Repetidor <<<")
     println("=".repeat(50))
+
+    val dados = dadosIniciais()
+
+    var porta = ""
+    var metragemUtilizada = ""
+    var modelo = ""
+
+    var sugeridoInstalacao = ""
+    var instaladoEm = ""
+
+    if(dados.clientePresente == "SIM"){
+        porta = lerEntrada("Porta: ")
+        metragemUtilizada = lerEntrada("Metragem utilizada: ")
+        modelo = lerEntrada("Modelo: ")
+
+        sugeridoInstalacao = lerEntrada("Foi sugerido instalação no(a): ")
+        instaladoEm = lerEntrada("Equipamento instalado no(a): ")
+    }else{
+        println("\n⚠️ Cliente não estava presente")
+    }
+
+    val obsAssinaturasData = obsAssinaturas(dados.clientePresente)
+
+    // Criar objeto OS com os dados coletados
+    val osInstalacaoRepetidor = OrdemServico(
+        tipo = "Instalação de Repetidores",
+        dataAtendimento = dados.dataAtendimento,
+        chegada = dados.chegada,
+        saida = dados.saida,
+        clientePresente = dados.clientePresente,
+        instaladoEm = instaladoEm,
+        modelo = modelo,
+        sinal = "",
+        equipamentoBom = "",
+        temRepetidor = "",
+        temEquipamentosTV = "",
+        porta = porta,
+        metragemUtilizada = metragemUtilizada,
+        sugeridoInstalacao = sugeridoInstalacao,
+        observacoes = obsAssinaturasData.observacoes,
+        assinaturaTecnico = obsAssinaturasData.assinaturaTecnico,
+        assinaturaCliente = obsAssinaturasData.assinaturaCliente,
+        cpfCliente = obsAssinaturasData.cpfCliente
+    )
+    exibirOS(osInstalacaoRepetidor)
 }
 
 fun reativacao() {
@@ -118,7 +183,6 @@ fun reativacao() {
 
     // Só pergunta sobre equipamento se cliente estava presente
     if (dados.clientePresente == "SIM") {
-        println("\n📍 DADOS DO EQUIPAMENTO (cliente presente):")
         instaladoEm = lerEntrada("Equipamento instalado no(a): ")
         modelo = lerEntrada("Modelo do Equipamento: ")
         sinal = lerEntrada("Sinal: ")
@@ -128,21 +192,13 @@ fun reativacao() {
         temRepetidor = lerSimNao("Tem Repetidor de Sinal")
         temEquipamentosTV = lerSimNao("Tem Equipamentos de TV")
     } else {
-        println("\n⚠️ Cliente não estava presente - campos de equipamento serão deixados em branco")
+        println("\n⚠️ Cliente não estava presente")
     }
 
-    // Observações e assinaturas (sempre preenchidos)
-    println("\n📋 OBSERVAÇÕES:")
-    val observacoes = lerEntrada("OBS: ", permitirVazio = true)
-
-    println("\n✍️ ASSINATURAS:")
-    val assinaturaTecnico = lerEntrada("Assinatura do Técnico: ")
-    val assinaturaCliente = lerEntrada("Assinatura do Cliente/Responsável: ",
-        permitirVazio = dados.clientePresente != "SIM") // Opcional se cliente não estava presente
-    val cpfCliente = lerEntrada("CPF do Cliente/Responsável (opcional): ", permitirVazio = true)
+    val obsAssinaturasData = obsAssinaturas(dados.clientePresente)
 
     // Criar objeto OS com os dados coletados
-    val os = OrdemServico(
+    val osReativacao = OrdemServico(
         tipo = "Reativação",
         dataAtendimento = dados.dataAtendimento,
         chegada = dados.chegada,
@@ -154,13 +210,16 @@ fun reativacao() {
         equipamentoBom = equipamentoBom,
         temRepetidor = temRepetidor,
         temEquipamentosTV = temEquipamentosTV,
-        observacoes = observacoes,
-        assinaturaTecnico = assinaturaTecnico,
-        assinaturaCliente = assinaturaCliente,
-        cpfCliente = cpfCliente
+        porta = "",
+        metragemUtilizada = "",
+        sugeridoInstalacao = "",
+        observacoes = obsAssinaturasData.observacoes,
+        assinaturaTecnico = obsAssinaturasData.assinaturaTecnico,
+        assinaturaCliente = obsAssinaturasData.assinaturaCliente,
+        cpfCliente = obsAssinaturasData.cpfCliente
     )
 
-    exibirOS(os)
+    exibirOS(osReativacao)
 }
 
 fun trocaDeEquipamento() {
@@ -200,10 +259,13 @@ data class OrdemServico(
     val equipamentoBom: String,
     val temRepetidor: String,
     val temEquipamentosTV: String,
+    val porta: String,
+    val metragemUtilizada: String,
+    val sugeridoInstalacao: String,
     val observacoes: String,
     val assinaturaTecnico: String,
     val assinaturaCliente: String,
-    val cpfCliente: String = ""
+    val cpfCliente: String
 )
 
 // Função auxiliar para ler entradas com validação
@@ -301,6 +363,6 @@ fun exibirOS(os: OrdemServico) {
 
 fun main() {
     println("\t\n >>> Olá, Bem vindo ao gerador de OS <<<\n")
+    val nomeDoCliente = validaNome("> Digite o nome do cliente: ")
     menuDeOS()
-    //val nomeDoCliente = validaNome("> Digite o nome do cliente: ")
 }
