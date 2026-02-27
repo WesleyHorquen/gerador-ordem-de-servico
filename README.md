@@ -49,9 +49,6 @@ Este projeto é um exemplo interessante de como a IA pode acelerar o desenvolvim
 - ✅ CPF do responsável (opcional)
 
 ## 🤖 Site criado através do Lovable
-### Repositório:
-[osamazon](https://github.com/WesleyHorquen/osamazon)
-
 ### Site:
 https://osamazon.lovable.app/
 ## 🚀 Como Usar
